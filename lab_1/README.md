@@ -10,4 +10,4 @@
 * **random_20()** - prints random 20 integers statistics.
 * **calculator()** - calculator.
 * **plot()** - draws plot of given function on given interval _(for example sin(x))_:
-![plot](/Plot.png)
+![plot](/lab_1/Plot.png)
