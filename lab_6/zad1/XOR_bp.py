@@ -16,10 +16,7 @@ def ReLU(x):
 
 
 def ReLU_derivative(x):
-    b = x.copy()
-    b[b < 0.0] = 0.0
-    b[b >= 0.0] = 1.0
-    return b
+    return 1*(x >= 0)
 
 
 class NeuralNetwork:
