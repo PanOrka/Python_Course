@@ -44,22 +44,13 @@ class NeuralNetwork:
         self.weights1 += d_weights1
         self.weights2 += d_weights2
 
-# Po wykonaniu kilku testow, najlepsze wyniki dawaly sigmoid
-# na pierwszej warstwie oraz ReLU na drugiej
-# sigmoid utrzymuje wynik w przedziale (0, 1), nie pozwalajac
-# na ucieczke z informacji binarnej, po tej aktywacji ReLU
-# stara sie dopasowac, stad korzystanie z ReLU nie powoduje
-# wystrzelenia gradientu i eta moze byc dosc duze, aby
-# learning rate byl duzy i siec szybko sie uczy bez
-# wypadania z optimow.
-
 
 if __name__ == "__main__":
     X = numpy.array([[0, 0, 1],   # jedynka sluzy tutaj jako bias
                      [0, 1, 1],   # przedstawiona jako 1*w_b zamiast b
                      [1, 0, 1],   # dla neuronow w hidden layer zostana dodane
                      [1, 1, 1]])  # w_b pelniace role biasu dla kazdego z nich
-    y = numpy.array([[0], [1], [1], [0]])
+    y = numpy.array([[0], [0], [0], [1]])
     nn = NeuralNetwork(X, y)
 
     for i in range(5000):

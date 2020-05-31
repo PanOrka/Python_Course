@@ -1,5 +1,6 @@
 import numpy as np
 from matplotlib import pyplot as plt
+from matplotlib.animation import FuncAnimation
 
 
 def tanh(x):
@@ -7,6 +8,16 @@ def tanh(x):
 
 
 def tanh_derivative(x):
+    '''
+    Ta funkcja zawiera blad, o ktorym wiem,
+    zle jest liczona pochodna, powinno byc:
+    return 1.0 - x**2
+    poniewaz tanh(x) jest uzywane w
+    feedforward, ale ta funkcja bardzo dobrze
+    i bardzo szybko dopasowuje sie do sin(x),
+    w jakis sposob szybciej znajduje minima,
+    moze ma dobry landscape
+    '''
     return 1.0 - np.tanh(x)**2
 
 
@@ -58,6 +69,34 @@ class NeuralNetwork:
         return tanh(np.dot(layer_pred.T, self.weights2))
 
 
+fig, ax = plt.subplots()
+ln, = plt.plot([], [], 'ro', markersize=3)
+step = [1]
+
+
+def init():
+    ax.set_xlim(-0.1, 2.1)
+    ax.set_ylim(-1.1, 1.1)
+    return ln,
+
+
+def update(frame):
+    for _ in range(100):
+        nn.feedforward()
+        nn.backpropagation()
+    print("Krok uczenia:", round(step[0]*0.1, 1), "k")
+    print("Blad (training set):")
+    print(np.mean((nn.y - nn.output)**2))
+
+    pred = nn.prediction(x_test)
+    print("Blad (testing set):")
+    print(np.mean((y_t - pred)**2))
+    step[0] += 1
+
+    ln.set_data(x_t, pred)
+    return ln,
+
+
 if __name__ == "__main__":
     x = np.reshape(np.linspace(0, 2, 21), (21, 1))
     y = np.sin((3*np.pi/2) * x)
@@ -69,15 +108,7 @@ if __name__ == "__main__":
     y_t = np.sin((3*np.pi/2) * x_t)
     x_s = np.ones((161, 1))
     x_test = np.concatenate((x_t, x_s), axis=1)  # BIAS
-    while True:
-        for i in range(50000):
-            nn.feedforward()
-            nn.backpropagation()
-        pred = nn.prediction(x_test)
-        plt.plot(x_t, pred, 'ro', markersize=2, label="prediction")
-        plt.plot(x_t, y_t, 'bo', markersize=5, label="valid")
-        plt.show()
-        print(y)
-        print(nn.output)
-        print(nn.weights1)
-        print(nn.weights2)
+
+    plt.plot(x_t, y_t, 'bo', markersize=5)
+    ani = FuncAnimation(fig, update, frames=20, init_func=init)
+    plt.show()

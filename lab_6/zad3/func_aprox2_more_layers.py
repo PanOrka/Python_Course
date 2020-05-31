@@ -1,5 +1,6 @@
 import numpy as np
 from matplotlib import pyplot as plt
+from matplotlib.animation import FuncAnimation
 
 
 def tanh(x):
@@ -7,7 +8,7 @@ def tanh(x):
 
 
 def tanh_derivative(x):
-    return 1.0 - np.tanh(x)**2
+    return 1.0 - x**2
 
 
 def sigmoid(x):
@@ -33,11 +34,12 @@ class NeuralNetwork:
                  hidden_layer_size_1=10, hidden_layer_size_2=10):
         self.input = x
         self.weights1 = np.random.rand(hidden_layer_size_1, 2)
-        self.weights2 = np.random.rand(hidden_layer_size_2, hidden_layer_size_1 + 1)
+        self.weights2 = np.random.rand(hidden_layer_size_2,
+                                       hidden_layer_size_1 + 1)
         self.weights3 = np.random.rand(hidden_layer_size_2, 1)
         self.y = y
         self.output = np.zeros(self.y.shape)
-        self.eta = 0.01
+        self.eta = 0.005
         self.func = func
         self.d_func = d_func
 
@@ -81,6 +83,34 @@ class NeuralNetwork:
         return self.func[2](np.dot(layer2.T, self.weights3))
 
 
+fig, ax = plt.subplots()
+ln, = plt.plot([], [], 'ro', markersize=3)
+step = [1]
+
+
+def init():
+    ax.set_xlim(-0.1, 2.1)
+    ax.set_ylim(-1.1, 1.1)
+    return ln,
+
+
+def update(frame):
+    for _ in range(100):
+        nn.feedforward()
+        nn.backpropagation()
+    print("Krok uczenia:", round(step[0]*0.1, 1), "k")
+    print("Blad (training set):")
+    print(np.mean((nn.y - nn.output)**2))
+
+    pred = nn.prediction(x_test)
+    print("Blad (testing set):")
+    print(np.mean((y_t - pred)**2))
+    step[0] += 1
+
+    ln.set_data(x_t, pred)
+    return ln,
+
+
 if __name__ == "__main__":
     x = np.reshape(np.linspace(0, 2, 21), (21, 1))
     y = np.sin((3 * np.pi / 2) * x)
@@ -96,16 +126,7 @@ if __name__ == "__main__":
     y_t = np.sin((3 * np.pi / 2) * x_t)
     x_s = np.ones((161, 1))
     x_test = np.concatenate((x_t, x_s), axis=1)  # BIAS
-    while True:
-        for i in range(100000):
-            nn.feedforward()
-            nn.backpropagation()
-        pred = nn.prediction(x_test)
-        plt.plot(x_t, pred, 'ro', markersize=2, label="prediction")
-        plt.plot(x_t, y_t, 'bo', markersize=5, label="valid")
-        plt.show()
-        print(y)
-        print(nn.output)
-        print(nn.weights1)
-        print(nn.weights2)
-        print(nn.weights3)
+
+    plt.plot(x_t, y_t, 'bo', markersize=5)
+    ani = FuncAnimation(fig, update, frames=20, init_func=init)
+    plt.show()

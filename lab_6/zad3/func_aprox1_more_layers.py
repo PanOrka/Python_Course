@@ -1,5 +1,6 @@
 import numpy as np
 from matplotlib import pyplot as plt
+from matplotlib.animation import FuncAnimation
 
 
 def tanh(x):
@@ -7,7 +8,7 @@ def tanh(x):
 
 
 def tanh_derivative(x):
-    return 1.0 - np.tanh(x)**2
+    return 1.0 - x**2
 
 
 def sigmoid(x):
@@ -33,7 +34,8 @@ class NeuralNetwork:
                  hidden_layer_size_1=5, hidden_layer_size_2=3):
         self.input = x
         self.weights1 = np.random.rand(hidden_layer_size_1, 2)
-        self.weights2 = np.random.rand(hidden_layer_size_2, hidden_layer_size_1 + 1)
+        self.weights2 = np.random.rand(hidden_layer_size_2,
+                                       hidden_layer_size_1 + 1)
         self.weights3 = np.random.rand(hidden_layer_size_2, 1)
         self.y = y
         self.output = np.zeros(self.y.shape)
@@ -81,6 +83,34 @@ class NeuralNetwork:
         return self.func[2](np.dot(layer2.T, self.weights3))
 
 
+fig, ax = plt.subplots()
+ln, = plt.plot([], [], 'ro', markersize=3)
+step = [1]
+
+
+def init():
+    ax.set_xlim(-55, 55)
+    ax.set_ylim(-100, 3000)
+    return ln,
+
+
+def update(frame):
+    for _ in range(1000):
+        nn.feedforward()
+        nn.backpropagation()
+    print("Krok uczenia:", step[0], "k")
+    print("Blad (training set):")
+    print(np.mean((y - nn.output)**2))
+
+    pred = nn.prediction(x_test)
+    print("Blad (testing set):")
+    print(np.mean((y_t - pred)**2))
+    step[0] += 1
+
+    ln.set_data(x_t, pred)
+    return ln,
+
+
 if __name__ == "__main__":
     x = np.reshape(np.linspace(-50, 50, 26), (26, 1))
     y = x**2
@@ -96,16 +126,13 @@ if __name__ == "__main__":
     y_t = x_t**2
     x_s = np.ones((101, 1))
     x_test = np.concatenate((x_t, x_s), axis=1)  # BIAS
-    while True:
-        for i in range(100000):
-            nn.feedforward()
-            nn.backpropagation()
-        pred = nn.prediction(x_test)
-        plt.plot(x_t, pred, 'ro', markersize=2, label="prediction")
-        plt.plot(x_t, y_t, 'bo', markersize=5, label="valid")
-        plt.show()
-        print(y)
-        print(nn.output)
-        print(nn.weights1)
-        print(nn.weights2)
-        print(nn.weights3)
+
+    plt.plot(x_t, y_t, 'bo', markersize=5)
+    ani = FuncAnimation(fig, update, frames=20, init_func=init)
+    plt.show()
+
+    # Dla sieci 1-5-3-1 wyniki sa lepsze, ale nauka trwa dluzej,
+    # odpowiednio trzeba dobrac wspolczynnik eta, aby nie
+    # "przestrzelic" rozwiazan
+    # Po dluzszej nauce aproksymacja jest lepsza od sieci
+    # 1-100-1, dostajemy mniejszy blad srednio-kwadratowy
