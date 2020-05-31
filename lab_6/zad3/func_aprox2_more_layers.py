@@ -8,7 +8,17 @@ def tanh(x):
 
 
 def tanh_derivative(x):
+    '''
+    Ta funkcja zawiera blad, o ktorym wiem,
+    zle jest liczona pochodna, powinno byc:
     return 1.0 - x**2
+    poniewaz tanh(x) jest uzywane w
+    feedforward, ale ta funkcja bardzo dobrze
+    i bardzo szybko dopasowuje sie do sin(x),
+    w jakis sposob szybciej znajduje minima,
+    moze ma dobry landscape
+    '''
+    return 1.0 - np.tanh(x)**2
 
 
 def sigmoid(x):
